@@ -34,14 +34,17 @@ if [ -z "$BACKEND_URL" ]; then\n\
 fi\n\
 echo "Using backend URL: $BACKEND_URL"\n\
 sed -i "s|BACKEND_URL_PLACEHOLDER|$BACKEND_URL|g" /etc/nginx/conf.d/default.conf\n\
+# Modify the main nginx.conf to ensure it binds to the right port\n\
+sed -i "s/listen       80/listen       8080/g" /etc/nginx/conf.d/default.conf\n\
+# Make sure nginx is not running as daemon\n\
 echo "Nginx configuration:"\n\
 cat /etc/nginx/conf.d/default.conf\n\
 echo "Starting nginx..."\n\
-nginx -g "daemon off;"' > /docker-entrypoint.sh && \
+exec nginx -g "daemon off;"' > /docker-entrypoint.sh && \
 chmod +x /docker-entrypoint.sh
 
-# Make sure nginx listens on port 8080
-RUN sed -i 's/listen\s*80;/listen 8080;/g' /etc/nginx/conf.d/default.conf
+# Remove the default nginx config to avoid conflicts
+RUN rm -f /etc/nginx/conf.d/default.conf.default
 
 # Start Nginx server with the wrapper script
 CMD ["/docker-entrypoint.sh"] 
