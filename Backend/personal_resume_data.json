@@ -1,0 +1,332 @@
+{
+  "personal_info": {
+    "name": "Nihal",
+    "email": "penihaldm65@gmail.com",
+    "phone": "+91-8197922447",
+    "location": "Bangalore",
+    "linkedin": "dmnihal65",
+    "portfolio": null,
+    "github": "DMNihal65"
+  },
+  "summary": null,
+  "skills": {
+    "technical": [
+      "Python",
+      "VSCode",
+      "Github",
+      "JupiterNotebook",
+      "Adobe Suite",
+      "Figma",
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "Node.Js",
+      "Vue",
+      "React",
+      "Express",
+      "MySQL",
+      "PostgresSQL",
+      "MongoDB",
+      "Machine-Learning",
+      "FastApi",
+      "Docker",
+      "Git"
+    ],
+    "soft": [],
+    "languages": [],
+    "tools": [],
+    "frameworks": [],
+    "methodologies": [],
+    "domain_knowledge": []
+  },
+  "experience": [
+    {
+      "title": "Full Stack Developer",
+      "company": "Central Manufacturing Technology Institute",
+      "location": "Bangalore",
+      "duration": "March 2024 - Present",
+      "responsibilities": [
+        "Led teams of 5\u20136 developers, delivering tailored software solutions for manufacturing and logistics industries.",
+        "Spearheading the development of a Manufacturing Execution System (MES) to enhance production efficiency and quality for a leading Indian manufacturer.",
+        "Built a logistics platform with route optimization, real-time tracking, and driver- friendly mobile apps.",
+        "Designed a secure, scalable solution on AWS for efficient document storage and access.",
+        "Developed a streamlined system to optimize stock tracking and minimize downtime.",
+        "Delivered IoT-integrated dashboards for real-time data visualization, enhancing equipment reliability and decision-making."
+      ],
+      "achievements": [],
+      "skills_used": [],
+      "technologies": [],
+      "impact": null
+    },
+    {
+      "title": "Graduate Apprentice",
+      "company": "Central Manufacturing Technology Institute",
+      "location": "Bangalore",
+      "duration": "July 2023 - March 2024",
+      "responsibilities": [
+        "Developing cutting-edge dashboards and websites with the latest web tech, enhancing data-driven decisions, and boosting online engagement by 15 percent.",
+        "Collaboratedwithateamof4tocreateintuitivedashboards, improvingdata-drivendecision-makingby20Percent.",
+        "Designed and integrated IoT solutions with sensors and data analytics, increasing process optimization efficiency by 10 percent."
+      ],
+      "achievements": [],
+      "skills_used": [],
+      "technologies": [],
+      "impact": null
+    }
+  ],
+  "education": [
+    {
+      "degree": "BE - Computer Science and Engineering",
+      "institution": "Acharya Institute of Technology, Bangalore",
+      "location": "Bangalore",
+      "graduation_date": "2023",
+      "gpa": "8.1",
+      "honors": [],
+      "relevant_coursework": [],
+      "activities": []
+    }
+  ],
+  "certifications": [
+    {
+      "name": "Data Analysis with Python",
+      "issuer": "IBM",
+      "date": "2023",
+      "expiration": null
+    },
+    {
+      "name": "100 Days of Code : The Complete Python Bootcamp",
+      "issuer": "Udemy",
+      "date": "2022",
+      "expiration": null
+    }
+  ],
+  "projects": [
+    {
+      "name": "AI MOCK INTERVIEW",
+      "description": "Designed an AI-powered web application to help job seekers prepare for interviews through tailored simulations.",
+      "role": null,
+      "duration": "June 2024",
+      "technologies": [
+        "Next.js",
+        "Drizzle ORM",
+        "Gemini AI",
+        "PostgreSQL",
+        "TailwindCSS",
+        "shadcn",
+        "Vercel"
+      ],
+      "outcomes": [],
+      "url": "AI-Mock Interview"
+    },
+    {
+      "name": "CODESNIPPET MASTER",
+      "description": "Developed a SaaS platform for efficient code snippet management to boost developer productivity.",
+      "role": null,
+      "duration": "July 2024",
+      "technologies": [
+        "Next.js",
+        "Drizzle ORM",
+        "Gemini AI",
+        "PostgreSQL",
+        "TailwindCSS",
+        "shadcn",
+        "Vercel"
+      ],
+      "outcomes": [],
+      "url": "Code Snippet Master"
+    },
+    {
+      "name": "PHISHING WEBSITE DETECTION",
+      "description": "Built a web app with deep learning, detecting phishing sites at 92 percent accuracy.",
+      "role": null,
+      "duration": "Feb 2023 - Jun 2023",
+      "technologies": [
+        "Python",
+        "Deep Learning",
+        "ML Algorithms"
+      ],
+      "outcomes": [
+        "Received 3rd prize in the Computer Science and Engineering department for the project\u2019s excellence and impact.",
+        "Enhanced cybersecurity by proactively identifying and alerting users to potential phishing threats."
+      ],
+      "url": null
+    }
+  ],
+  "publications": [],
+  "awards": [],
+  "languages": [],
+  "volunteer_experience": [],
+  "keywords": [
+    "Full Stack Developer",
+    "Python",
+    "React",
+    "Vue",
+    "Node.js",
+    "AWS",
+    "AI/ML",
+    "IoT",
+    "DevOps",
+    "UI/UX"
+  ],
+  "strengths": [
+    {
+      "strength": "Strong technical skills in Python, React, Vue, Node.js, AWS, AI/ML, IoT, and DevOps",
+      "evidence": "Developed and deployed scalable web and mobile applications using React, Vue.js, and FastAPI. Integrated AI/ML and IoT technologies to develop advanced solutions, including Industry 4.0 MES systems and logistics platforms. Streamlined deployment and development processes through cloud platforms (AWS), Docker, and CI/CD pipelines."
+    },
+    {
+      "strength": "Experience in leading cross-functional teams and delivering high-quality software solutions",
+      "evidence": "Led teams of 5-6 developers to deliver tailored software solutions for manufacturing and logistics industries. Spearheaded the development of a Manufacturing Execution System (MES) to enhance production efficiency and quality for a leading Indian manufacturer."
+    },
+    {
+      "strength": "Strong understanding of UI/UX principles and ability to design user-centric interfaces",
+      "evidence": "Designed user-centric, intuitive interfaces, ensuring optimal user experiences through modern UI/UX practices."
+    }
+  ],
+  "achievements": [
+    {
+      "achievement": "Developed a logistics platform with route optimization, real-time tracking, and driver-friendly mobile apps",
+      "impact": "Improved logistics efficiency and reduced delivery times"
+    },
+    {
+      "achievement": "Designed and integrated IoT solutions with sensors and data analytics, increasing process optimization efficiency by 10 percent",
+      "impact": "Improved production efficiency and reduced downtime"
+    },
+    {
+      "achievement": "Received 3rd prize in the Computer Science and Engineering department for the excellence and impact of the Phishing Website Detection project",
+      "impact": "Enhanced cybersecurity and protected users from phishing threats"
+    }
+  ],
+  "skill_proficiency": [
+    {
+      "skill": "Python",
+      "level": "Expert",
+      "evidence": "Developed and deployed scalable web and mobile applications using React, Vue.js, and FastAPI. Integrated AI/ML and IoT technologies to develop advanced solutions, including Industry 4.0 MES systems and logistics platforms."
+    },
+    {
+      "skill": "React",
+      "level": "Advanced",
+      "evidence": "Led teams of 5-6 developers to deliver tailored software solutions for manufacturing and logistics industries. Spearheaded the development of a Manufacturing Execution System (MES) to enhance production efficiency and quality for a leading Indian manufacturer."
+    },
+    {
+      "skill": "Vue",
+      "level": "Intermediate",
+      "evidence": "Developed and deployed scalable web and mobile applications using React, Vue.js, and FastAPI. Integrated AI/ML and IoT technologies to develop advanced solutions, including Industry 4.0 MES systems and logistics platforms."
+    },
+    {
+      "skill": "Node.js",
+      "level": "Intermediate",
+      "evidence": "Developed and deployed scalable web and mobile applications using React, Vue.js, and FastAPI. Integrated AI/ML and IoT technologies to develop advanced solutions, including Industry 4.0 MES systems and logistics platforms."
+    },
+    {
+      "skill": "AWS",
+      "level": "Intermediate",
+      "evidence": "Streamlined deployment and development processes through cloud platforms (AWS), Docker, and CI/CD pipelines."
+    },
+    {
+      "skill": "AI/ML",
+      "level": "Intermediate",
+      "evidence": "Integrated AI/ML and IoT technologies to develop advanced solutions, including Industry 4.0 MES systems and logistics platforms."
+    },
+    {
+      "skill": "IoT",
+      "level": "Intermediate",
+      "evidence": "Integrated AI/ML and IoT technologies to develop advanced solutions, including Industry 4.0 MES systems and logistics platforms."
+    },
+    {
+      "skill": "DevOps",
+      "level": "Intermediate",
+      "evidence": "Streamlined deployment and development processes through cloud platforms (AWS), Docker, and CI/CD pipelines."
+    },
+    {
+      "skill": "UI/UX",
+      "level": "Intermediate",
+      "evidence": "Designed user-centric, intuitive interfaces, ensuring optimal user experiences through modern UI/UX practices."
+    }
+  ],
+  "experience_summary": {
+    "total_years": "1 year",
+    "industries": [
+      "Manufacturing",
+      "Logistics"
+    ],
+    "company_sizes": [
+      "Enterprise"
+    ],
+    "roles": [
+      "Full Stack Developer",
+      "Graduate Apprentice"
+    ]
+  },
+  "gaps": [],
+  "ats_score": {
+    "formatting": "8 out of 10",
+    "keyword_optimization": "9 out of 10",
+    "content_quality": "8 out of 10",
+    "overall": "8.5 out of 10"
+  },
+  "improvement_suggestions": [
+    {
+      "section": "Summary",
+      "issue": "Missing a concise summary statement",
+      "suggestion": "Add a brief summary statement at the beginning of the resume that highlights your key skills, experience, and career goals."
+    },
+    {
+      "section": "Projects",
+      "issue": "Missing quantifiable results for some projects",
+      "suggestion": "Add quantifiable results to your project descriptions to demonstrate the impact of your work."
+    }
+  ],
+  "professional_snapshot": "Nihal is a highly skilled Full Stack Developer with 1 year of experience in the manufacturing and logistics industries. He has a strong technical foundation in Python, React, Vue, Node.js, AWS, AI/ML, IoT, and DevOps. Nihal is also proficient in UI/UX design and has a proven track record of leading cross-functional teams and delivering high-quality software solutions.",
+  "unique_selling_points": [
+    "Strong technical skills in Python, React, Vue, Node.js, AWS, AI/ML, IoT, and DevOps",
+    "Experience in leading cross-functional teams and delivering high-quality software solutions",
+    "Strong understanding of UI/UX principles and ability to design user-centric interfaces"
+  ],
+  "career_narrative": "Nihal began his career as a Graduate Apprentice at Central Manufacturing Technology Institute, where he developed cutting-edge dashboards and websites using the latest web technologies. He then joined the same organization as a Full Stack Developer, where he led teams of 5-6 developers and delivered tailored software solutions for manufacturing and logistics industries.",
+  "technical_expertise_summary": "Nihal has a strong technical foundation in Python, React, Vue, Node.js, AWS, AI/ML, IoT, and DevOps. He is proficient in using these technologies to develop and deploy scalable web and mobile applications, integrate AI/ML and IoT solutions, and streamline deployment and development processes.",
+  "soft_skills_summary": "Nihal is a highly motivated and results-oriented individual with strong leadership and communication skills. He is able to work independently and as part of a team, and is always willing to go the extra mile to get the job done.",
+  "achievement_highlights": [
+    "Led teams of 5-6 developers to deliver tailored software solutions for manufacturing and logistics industries",
+    "Spearheaded the development of a Manufacturing Execution System (MES) to enhance production efficiency and quality for a leading Indian manufacturer",
+    "Designed and integrated IoT solutions with sensors and data analytics, increasing process optimization efficiency by 10 percent",
+    "Received 3rd prize in the Computer Science and Engineering department for the excellence and impact of the Phishing Website Detection project"
+  ],
+  "potential_roles": [
+    "Full Stack Developer",
+    "Software Engineer",
+    "Web Developer",
+    "Mobile Developer",
+    "AI/ML Engineer",
+    "IoT Developer",
+    "DevOps Engineer",
+    "UI/UX Designer"
+  ],
+  "interview_talking_points": [
+    {
+      "topic": "Technical skills and experience",
+      "key_points": [
+        "Strong technical skills in Python, React, Vue, Node.js, AWS, AI/ML, IoT, and DevOps",
+        "Experience in leading cross-functional teams and delivering high-quality software solutions",
+        "Strong understanding of UI/UX principles and ability to design user-centric interfaces"
+      ]
+    },
+    {
+      "topic": "Achievements and impact",
+      "key_points": [
+        "Led teams of 5-6 developers to deliver tailored software solutions for manufacturing and logistics industries",
+        "Spearheaded the development of a Manufacturing Execution System (MES) to enhance production efficiency and quality for a leading Indian manufacturer",
+        "Designed and integrated IoT solutions with sensors and data analytics, increasing process optimization efficiency by 10 percent",
+        "Received 3rd prize in the Computer Science and Engineering department for the excellence and impact of the Phishing Website Detection project"
+      ]
+    },
+    {
+      "topic": "Career goals and aspirations",
+      "key_points": [
+        "Aspires to become a lead software engineer or technical architect",
+        "Interested in working on challenging projects that have a positive impact on the world",
+        "Eager to learn and grow, and to contribute to the success of the team and organization"
+      ]
+    }
+  ],
+  "session_id": "858ba26f-9e65-4544-b2ca-04e4c911f167"
+}
