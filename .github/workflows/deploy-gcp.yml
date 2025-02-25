@@ -64,6 +64,7 @@ jobs:
         image: ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/resume-agent/${{ env.FRONTEND_SERVICE_NAME }}:${{ github.sha }}
         env_vars: |
           BACKEND_URL=${{ steps.deploy-backend.outputs.url }}
+        port: 8080
         
     - name: Show URLs
       run: |
