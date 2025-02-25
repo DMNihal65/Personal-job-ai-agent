@@ -176,14 +176,27 @@ This guide explains how to dockerize and deploy the Job Application Assistant ap
 - **Backend**: FastAPI application that handles resume analysis, job description analysis, and question answering
 - **Frontend**: React application that provides the user interface
 
+## Deployment Options
+
+This application can be deployed in multiple ways:
+
+### 1. Google Cloud Platform (Recommended)
+
+The application is configured for deployment to Google Cloud Run, which provides:
+- Serverless container deployment
+- Automatic scaling
+- Pay-per-use pricing model
+- HTTPS by default
+
+Follow the detailed instructions in [DEPLOYMENT-GCP.md](DEPLOYMENT-GCP.md) to deploy to Google Cloud Platform.
+
+### 2. AWS EC2
+
+Alternatively, you can deploy to AWS EC2 using the instructions in [DEPLOYMENT.md](DEPLOYMENT.md).
+
 ## Local Development with Docker
 
-### Prerequisites
-
-- Docker and Docker Compose installed
-- Google Gemini API key
-
-### Setup
+For local development with Docker:
 
 1. Clone the repository:
 ```bash

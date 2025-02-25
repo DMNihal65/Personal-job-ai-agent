@@ -23,8 +23,14 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 80
-EXPOSE 80
+# Expose port 8080 (Cloud Run prefers this port)
+EXPOSE 8080
 
-# Start Nginx server
-CMD ["nginx", "-g", "daemon off;"] 
+# Create a wrapper script to replace environment variables in the nginx config
+RUN echo '#!/bin/sh\n\
+sed -i "s|http://backend:8000|${BACKEND_URL}|g" /etc/nginx/conf.d/default.conf\n\
+nginx -g "daemon off;"' > /docker-entrypoint.sh && \
+chmod +x /docker-entrypoint.sh
+
+# Start Nginx server with the wrapper script
+CMD ["/docker-entrypoint.sh"] 
