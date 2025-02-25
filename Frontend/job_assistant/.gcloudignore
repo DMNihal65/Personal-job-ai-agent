@@ -1,0 +1,32 @@
+# Exclude git and build files
+.git
+.github
+.gitignore
+.DS_Store
+node_modules/
+
+# Exclude Docker-related files
+Dockerfile
+docker-compose.yml
+*.docker
+.dockerignore
+
+# Exclude build artifacts
+dist/
+build/
+*.tar.gz
+
+# Exclude configuration files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.log
+
+# Exclude test files
+test/
+tests/
+__tests__/
+*.test.js
+*.spec.js 

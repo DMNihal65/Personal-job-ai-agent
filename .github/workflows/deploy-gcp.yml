@@ -11,7 +11,7 @@ env:
   REGION: us-central1
 
 jobs:
-  deploy:
+  deploy-backend:
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
@@ -50,55 +50,147 @@ jobs:
         image: ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/resume-agent/${{ env.BACKEND_SERVICE_NAME }}:${{ github.sha }}
         env_vars: |
           GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-        
-    - name: Build simple test frontend image
+    
+    - name: Output backend URL
+      id: backend-url
       run: |
-        # Clean up any existing container with the same name
-        docker stop frontend-test || true
-        docker rm frontend-test || true
+        echo "BACKEND_URL=${{ steps.deploy-backend.outputs.url }}" >> "$GITHUB_OUTPUT"
+
+  deploy-frontend:
+    needs: deploy-backend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Google Auth
+      id: auth
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
         
-        # Build the frontend image
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+    
+    - name: Create app.yaml for frontend
+      run: |
+        cat > Frontend/job_assistant/app.yaml << EOF
+        runtime: nodejs20
+        
+        env_variables:
+          BACKEND_URL: "${{ needs.deploy-backend.outputs.backend-url }}"
+          
+        handlers:
+        - url: /.*
+          script: auto
+        EOF
+        
+        cat Frontend/job_assistant/app.yaml
+    
+    - name: Create server.js for frontend
+      run: |
+        cat > Frontend/job_assistant/server.js << EOF
+        const express = require('express');
+        const path = require('path');
+        
+        const app = express();
+        const PORT = process.env.PORT || 8080;
+        const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
+        
+        console.log('Starting server with:');
+        console.log(\`PORT: \${PORT}\`);
+        console.log(\`BACKEND_URL: \${BACKEND_URL}\`);
+        
+        // Basic route for testing
+        app.get('/', (req, res) => {
+          res.send(\`
+            <html>
+              <head>
+                <title>Resume Agent Frontend</title>
+                <style>
+                  body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+                  h1 { color: #333; }
+                  .container { border: 1px solid #ddd; padding: 20px; border-radius: 5px; }
+                  .info { background-color: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+                </style>
+              </head>
+              <body>
+                <h1>Resume Agent Frontend</h1>
+                <div class="container">
+                  <p>This is a simple test page for the Resume Agent Frontend.</p>
+                  <div class="info">
+                    <p><strong>Port:</strong> \${PORT}</p>
+                    <p><strong>Backend URL:</strong> \${BACKEND_URL || "Not set"}</p>
+                  </div>
+                  <p>The backend API is available at: <a href="\${BACKEND_URL || "#"}" target="_blank">\${BACKEND_URL || "Not configured"}</a></p>
+                </div>
+              </body>
+            </html>
+          \`);
+        });
+        
+        // Health check endpoint
+        app.get('/health', (req, res) => {
+          res.status(200).send('OK');
+        });
+        
+        // Start the server
+        app.listen(PORT, '0.0.0.0', () => {
+          console.log(\`Server running at http://0.0.0.0:\${PORT}/\`);
+        });
+        EOF
+        
+        cat Frontend/job_assistant/server.js
+    
+    - name: Update package.json
+      run: |
         cd Frontend/job_assistant
-        docker build -t frontend-test .
-        
-        # Run the container locally to test
-        docker run -d --name frontend-test -p 8080:8080 -e PORT=8080 -e BACKEND_URL=${{ steps.deploy-backend.outputs.url }} frontend-test
-        
-        # Wait for the container to start
-        sleep 5
-        
-        # Check if the container is running
-        docker ps | grep frontend-test
-        
-        # Check the logs to see if it started correctly
-        docker logs frontend-test
-        
-        # Stop and remove the test container
-        docker stop frontend-test
-        docker rm frontend-test
-        
-        # Tag and push the image
-        docker tag frontend-test ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/resume-agent/$FRONTEND_SERVICE_NAME:${{ github.sha }}
-        docker push ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/resume-agent/$FRONTEND_SERVICE_NAME:${{ github.sha }}
-        
-    - name: Deploy frontend to Cloud Run with extended timeout
+        if [ ! -f package.json ]; then
+          echo "Creating package.json"
+          cat > package.json << EOF
+        {
+          "name": "resume-agent-frontend",
+          "version": "1.0.0",
+          "description": "Simple frontend for Resume Agent",
+          "main": "server.js",
+          "scripts": {
+            "start": "node server.js"
+          },
+          "dependencies": {
+            "express": "^4.18.2"
+          }
+        }
+        EOF
+        else
+          echo "Updating package.json"
+          jq '.dependencies.express = "^4.18.2" | .scripts.start = "node server.js" | .main = "server.js"' package.json > package.json.new
+          mv package.json.new package.json
+        fi
+        cat package.json
+    
+    - name: Deploy frontend to Cloud Run
       run: |
+        cd Frontend/job_assistant
         gcloud run deploy ${{ env.FRONTEND_SERVICE_NAME }} \
-          --image=${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/resume-agent/${{ env.FRONTEND_SERVICE_NAME }}:${{ github.sha }} \
+          --source=. \
           --region=${{ env.REGION }} \
           --platform=managed \
-          --port=8080 \
-          --set-env-vars=BACKEND_URL=${{ steps.deploy-backend.outputs.url }},PORT=8080 \
           --allow-unauthenticated \
+          --set-env-vars="BACKEND_URL=${{ needs.deploy-backend.outputs.backend-url }}" \
           --cpu=1 \
           --memory=512Mi \
-          --timeout=300 \
           --min-instances=0 \
           --max-instances=1 \
           --cpu-throttling
-        
+          
     - name: Show URLs
       run: |
-        echo "Backend URL: ${{ steps.deploy-backend.outputs.url }}"
+        echo "Backend URL: ${{ needs.deploy-backend.outputs.backend-url }}"
         FRONTEND_URL=$(gcloud run services describe ${{ env.FRONTEND_SERVICE_NAME }} --region=${{ env.REGION }} --format="value(status.url)")
         echo "Frontend URL: $FRONTEND_URL" 
