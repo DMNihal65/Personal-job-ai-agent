@@ -14,62 +14,65 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Production stage
-FROM nginx:alpine
+# Create a simple server to serve the static files
+RUN echo 'const express = require("express");\n\
+const path = require("path");\n\
+const fs = require("fs");\n\
+\n\
+const app = express();\n\
+const PORT = process.env.PORT || 8080;\n\
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";\n\
+\n\
+// Log environment variables\n\
+console.log("Starting server with:");\n\
+console.log(`PORT: ${PORT}`);\n\
+console.log(`BACKEND_URL: ${BACKEND_URL}`);\n\
+\n\
+// Replace BACKEND_URL in the built files\n\
+const replaceBackendUrl = () => {\n\
+  const indexPath = path.join(__dirname, "dist", "index.html");\n\
+  let content = fs.readFileSync(indexPath, "utf8");\n\
+  content = content.replace(/BACKEND_URL_PLACEHOLDER/g, BACKEND_URL);\n\
+  fs.writeFileSync(indexPath, content);\n\
+  console.log("Replaced backend URL in index.html");\n\
+};\n\
+\n\
+// Replace the backend URL before starting the server\n\
+replaceBackendUrl();\n\
+\n\
+// Serve static files\n\
+app.use(express.static(path.join(__dirname, "dist")));\n\
+\n\
+// Handle API requests\n\
+app.use("/api", (req, res) => {\n\
+  res.redirect(`${BACKEND_URL}${req.url}`);\n\
+});\n\
+\n\
+// For any other request, serve the React app\n\
+app.get("*", (req, res) => {\n\
+  res.sendFile(path.join(__dirname, "dist", "index.html"));\n\
+});\n\
+\n\
+// Start the server\n\
+app.listen(PORT, () => {\n\
+  console.log(`Server running on port ${PORT}`);\n\
+});' > server.js
 
-# Copy the build output to replace the default nginx contents
-COPY --from=build /app/dist /usr/share/nginx/html
+# Install express for the server
+RUN npm install express
 
-# Remove default nginx configuration
-RUN rm /etc/nginx/conf.d/default.conf
+# Final image
+FROM node:20-alpine
 
-# Create a simple nginx configuration that listens on port 8080
-RUN echo 'server {\n\
-    listen 8080;\n\
-    listen [::]:8080;\n\
-    server_name _;\n\
-    \n\
-    root /usr/share/nginx/html;\n\
-    index index.html;\n\
-    \n\
-    # Handle React routing\n\
-    location / {\n\
-        try_files $uri $uri/ /index.html;\n\
-    }\n\
-    \n\
-    # Proxy API requests to the backend\n\
-    location /api/ {\n\
-        proxy_pass BACKEND_URL_PLACEHOLDER/;\n\
-        proxy_http_version 1.1;\n\
-        proxy_set_header Upgrade $http_upgrade;\n\
-        proxy_set_header Connection "upgrade";\n\
-        proxy_set_header Host $host;\n\
-        proxy_cache_bypass $http_upgrade;\n\
-        proxy_set_header X-Real-IP $remote_addr;\n\
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\
-        proxy_set_header X-Forwarded-Proto $scheme;\n\
-    }\n\
-}' > /etc/nginx/conf.d/app.conf
+WORKDIR /app
 
-# Create a simple entrypoint script
-RUN echo '#!/bin/sh\n\
-if [ -z "$BACKEND_URL" ]; then\n\
-  echo "Warning: BACKEND_URL environment variable is not set. Using default value."\n\
-  export BACKEND_URL="http://localhost:8000"\n\
-fi\n\
-echo "Using backend URL: $BACKEND_URL"\n\
-sed -i "s|BACKEND_URL_PLACEHOLDER|$BACKEND_URL|g" /etc/nginx/conf.d/app.conf\n\
-echo "Nginx configuration:"\n\
-cat /etc/nginx/conf.d/app.conf\n\
-echo "Starting nginx..."\n\
-exec nginx -g "daemon off;"' > /docker-entrypoint.sh && \
-chmod +x /docker-entrypoint.sh
+# Copy built app and server
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/server.js .
+COPY --from=build /app/node_modules ./node_modules
 
-# Make sure nginx.conf is using port 8080
-RUN sed -i 's/80;/8080;/g' /etc/nginx/nginx.conf
-
-# Expose port 8080
+# Expose the port
 EXPOSE 8080
 
-# Start Nginx server with the wrapper script
-CMD ["/docker-entrypoint.sh"] 
+# Start the server
+CMD ["node", "server.js"] 
