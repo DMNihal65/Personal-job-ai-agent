@@ -1,0 +1,105 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+        
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+      
+    - name: Build, tag, and push backend image to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: resume-agent-backend
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./Backend
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        
+    - name: Build, tag, and push frontend image to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: resume-agent-frontend
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./Frontend/job_assistant
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          # Login to ECR
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+          
+          # Pull the latest images
+          docker pull ${{ steps.login-ecr.outputs.registry }}/resume-agent-backend:latest
+          docker pull ${{ steps.login-ecr.outputs.registry }}/resume-agent-frontend:latest
+          
+          # Create or update .env file
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
+          
+          # Create or update docker-compose.yml
+          cat > docker-compose.yml << 'EOL'
+          version: '3.8'
+          
+          services:
+            backend:
+              image: ${{ steps.login-ecr.outputs.registry }}/resume-agent-backend:latest
+              container_name: resume-agent-backend
+              restart: unless-stopped
+              ports:
+                - "8000:8000"
+              environment:
+                - GEMINI_API_KEY=${GEMINI_API_KEY}
+              volumes:
+                - ./personal_resume_data.json:/app/personal_resume_data.json
+              networks:
+                - resume-agent-network
+          
+            frontend:
+              image: ${{ steps.login-ecr.outputs.registry }}/resume-agent-frontend:latest
+              container_name: resume-agent-frontend
+              restart: unless-stopped
+              ports:
+                - "80:80"
+              depends_on:
+                - backend
+              networks:
+                - resume-agent-network
+          
+          networks:
+            resume-agent-network:
+              driver: bridge
+          EOL
+          
+          # Stop and remove existing containers
+          docker-compose down
+          
+          # Start new containers
+          docker-compose up -d
+          
+          # Clean up unused images
+          docker image prune -af 

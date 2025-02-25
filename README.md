@@ -165,4 +165,153 @@ python test_api.py
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+# Job Application Assistant - Deployment Guide
+
+This guide explains how to dockerize and deploy the Job Application Assistant application to AWS EC2.
+
+## Project Structure
+
+- **Backend**: FastAPI application that handles resume analysis, job description analysis, and question answering
+- **Frontend**: React application that provides the user interface
+
+## Local Development with Docker
+
+### Prerequisites
+
+- Docker and Docker Compose installed
+- Google Gemini API key
+
+### Setup
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd Resume_answers_agent
+```
+
+2. Create a `.env` file from the example:
+```bash
+cp .env.example .env
+```
+
+3. Edit the `.env` file and add your Google Gemini API key:
+```
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+4. Build and start the containers:
+```bash
+docker-compose up -d
+```
+
+5. Access the application at http://localhost
+
+## AWS Deployment
+
+### Prerequisites
+
+- AWS account with EC2 and ECR access
+- GitHub repository with the code
+- GitHub Actions configured
+
+### Setup AWS Resources
+
+1. Create an ECR repository for the backend:
+```bash
+aws ecr create-repository --repository-name resume-agent-backend
+```
+
+2. Create an ECR repository for the frontend:
+```bash
+aws ecr create-repository --repository-name resume-agent-frontend
+```
+
+3. Launch an EC2 instance:
+   - Use Amazon Linux 2 or Ubuntu
+   - Ensure it has at least 2GB RAM and 2 vCPUs
+   - Open ports 22 (SSH), 80 (HTTP), and 443 (HTTPS)
+   - Attach an IAM role with ECR pull permissions
+
+4. Install Docker and Docker Compose on the EC2 instance:
+```bash
+# For Amazon Linux 2
+sudo yum update -y
+sudo amazon-linux-extras install docker -y
+sudo service docker start
+sudo systemctl enable docker
+sudo usermod -a -G docker ec2-user
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+# For Ubuntu
+sudo apt update
+sudo apt install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker ubuntu
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+### Configure GitHub Secrets
+
+Add the following secrets to your GitHub repository:
+
+- `AWS_ACCESS_KEY_ID`: Your AWS access key
+- `AWS_SECRET_ACCESS_KEY`: Your AWS secret key
+- `AWS_REGION`: Your AWS region (e.g., us-east-1)
+- `EC2_HOST`: Public IP or DNS of your EC2 instance
+- `EC2_USERNAME`: Username for SSH (e.g., ec2-user or ubuntu)
+- `EC2_SSH_KEY`: Private SSH key for connecting to the EC2 instance
+- `GEMINI_API_KEY`: Your Google Gemini API key
+
+### Deploy
+
+1. Push your code to the main branch of your GitHub repository
+2. GitHub Actions will automatically build and deploy the application to your EC2 instance
+3. Access your application at http://your-ec2-public-ip
+
+## Manual Deployment
+
+If you prefer to deploy manually:
+
+1. Build the Docker images:
+```bash
+docker build -t resume-agent-backend ./Backend
+docker build -t resume-agent-frontend ./Frontend/job_assistant
+```
+
+2. Tag and push the images to ECR:
+```bash
+aws ecr get-login-password --region your-region | docker login --username AWS --password-stdin your-account-id.dkr.ecr.your-region.amazonaws.com
+docker tag resume-agent-backend your-account-id.dkr.ecr.your-region.amazonaws.com/resume-agent-backend:latest
+docker tag resume-agent-frontend your-account-id.dkr.ecr.your-region.amazonaws.com/resume-agent-frontend:latest
+docker push your-account-id.dkr.ecr.your-region.amazonaws.com/resume-agent-backend:latest
+docker push your-account-id.dkr.ecr.your-region.amazonaws.com/resume-agent-frontend:latest
+```
+
+3. SSH into your EC2 instance and pull the images:
+```bash
+aws ecr get-login-password --region your-region | docker login --username AWS --password-stdin your-account-id.dkr.ecr.your-region.amazonaws.com
+docker pull your-account-id.dkr.ecr.your-region.amazonaws.com/resume-agent-backend:latest
+docker pull your-account-id.dkr.ecr.your-region.amazonaws.com/resume-agent-frontend:latest
+```
+
+4. Create a docker-compose.yml file on your EC2 instance and start the containers:
+```bash
+docker-compose up -d
+```
+
+## Troubleshooting
+
+- **Backend container not starting**: Check the logs with `docker logs resume-agent-backend`
+- **Frontend not connecting to backend**: Ensure the nginx configuration is correct and the backend is accessible
+- **Permission issues with personal_resume_data.json**: Ensure the file exists and has the correct permissions
+
+## Security Considerations
+
+- Use HTTPS in production by configuring SSL certificates
+- Restrict access to your EC2 instance using security groups
+- Use AWS Secrets Manager for storing sensitive information
+- Consider using AWS ECS or EKS for more robust container orchestration 

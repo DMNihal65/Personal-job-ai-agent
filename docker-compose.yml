@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: resume-agent-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      - ./Backend/personal_resume_data.json:/app/personal_resume_data.json
+    networks:
+      - resume-agent-network
+
+  frontend:
+    build:
+      context: ./Frontend/job_assistant
+      dockerfile: Dockerfile
+    container_name: resume-agent-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - resume-agent-network
+
+networks:
+  resume-agent-network:
+    driver: bridge 
