@@ -51,20 +51,51 @@ jobs:
         env_vars: |
           GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
         
-    - name: Build and push frontend image
+    - name: Build simple test frontend image
       run: |
-        docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/resume-agent/$FRONTEND_SERVICE_NAME:${{ github.sha }} ./Frontend/job_assistant
+        # Clean up any existing container with the same name
+        docker stop frontend-test || true
+        docker rm frontend-test || true
+        
+        # Build the frontend image
+        cd Frontend/job_assistant
+        docker build -t frontend-test .
+        
+        # Run the container locally to test
+        docker run -d --name frontend-test -p 8080:8080 -e PORT=8080 -e BACKEND_URL=${{ steps.deploy-backend.outputs.url }} frontend-test
+        
+        # Wait for the container to start
+        sleep 5
+        
+        # Check if the container is running
+        docker ps | grep frontend-test
+        
+        # Check the logs to see if it started correctly
+        docker logs frontend-test
+        
+        # Stop and remove the test container
+        docker stop frontend-test
+        docker rm frontend-test
+        
+        # Tag and push the image
+        docker tag frontend-test ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/resume-agent/$FRONTEND_SERVICE_NAME:${{ github.sha }}
         docker push ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/resume-agent/$FRONTEND_SERVICE_NAME:${{ github.sha }}
         
-    - name: Deploy frontend to Cloud Run directly with gcloud
+    - name: Deploy frontend to Cloud Run with extended timeout
       run: |
         gcloud run deploy ${{ env.FRONTEND_SERVICE_NAME }} \
           --image=${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/resume-agent/${{ env.FRONTEND_SERVICE_NAME }}:${{ github.sha }} \
           --region=${{ env.REGION }} \
           --platform=managed \
           --port=8080 \
-          --set-env-vars=BACKEND_URL=${{ steps.deploy-backend.outputs.url }} \
-          --allow-unauthenticated
+          --set-env-vars=BACKEND_URL=${{ steps.deploy-backend.outputs.url }},PORT=8080 \
+          --allow-unauthenticated \
+          --cpu=1 \
+          --memory=512Mi \
+          --timeout=300 \
+          --min-instances=0 \
+          --max-instances=1 \
+          --cpu-throttling
         
     - name: Show URLs
       run: |
