@@ -56,16 +56,18 @@ jobs:
         docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/resume-agent/$FRONTEND_SERVICE_NAME:${{ github.sha }} ./Frontend/job_assistant
         docker push ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/resume-agent/$FRONTEND_SERVICE_NAME:${{ github.sha }}
         
-    - name: Deploy frontend to Cloud Run
-      uses: google-github-actions/deploy-cloudrun@v1
-      with:
-        service: ${{ env.FRONTEND_SERVICE_NAME }}
-        region: ${{ env.REGION }}
-        image: ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/resume-agent/${{ env.FRONTEND_SERVICE_NAME }}:${{ github.sha }}
-        env_vars: |
-          BACKEND_URL=${{ steps.deploy-backend.outputs.url }}
+    - name: Deploy frontend to Cloud Run directly with gcloud
+      run: |
+        gcloud run deploy ${{ env.FRONTEND_SERVICE_NAME }} \
+          --image=${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/resume-agent/${{ env.FRONTEND_SERVICE_NAME }}:${{ github.sha }} \
+          --region=${{ env.REGION }} \
+          --platform=managed \
+          --port=8080 \
+          --set-env-vars=BACKEND_URL=${{ steps.deploy-backend.outputs.url }} \
+          --allow-unauthenticated
         
     - name: Show URLs
       run: |
         echo "Backend URL: ${{ steps.deploy-backend.outputs.url }}"
-        echo "Frontend URL: https://${{ env.FRONTEND_SERVICE_NAME }}-${{ github.sha }}-${{ secrets.GCP_PROJECT_NUMBER }}.a.run.app" 
+        FRONTEND_URL=$(gcloud run services describe ${{ env.FRONTEND_SERVICE_NAME }} --region=${{ env.REGION }} --format="value(status.url)")
+        echo "Frontend URL: $FRONTEND_URL" 
