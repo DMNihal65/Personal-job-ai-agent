@@ -1,0 +1,75 @@
+name: Development Deployment
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    # Setup Python for Backend
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    # Setup Node.js for Frontend
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        
+    # Install Chrome and dependencies for Selenium
+    - name: Install Chrome and dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget gnupg unzip xvfb libxi6 libgconf-2-4
+        wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+        echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+        CHROME_DRIVER_VERSION=$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
+        wget -q -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip
+        sudo unzip /tmp/chromedriver.zip -d /usr/local/bin/
+        sudo chmod +x /usr/local/bin/chromedriver
+
+    # Backend Setup and Run
+    - name: Setup Backend
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      run: |
+        cd Backend
+        python -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
+        touch personal_resume_data.json
+        echo "{}" > personal_resume_data.json
+        nohup python -m uvicorn api:app --host 0.0.0.0 --port 8000 &
+        echo "Backend started on port 8000"
+        sleep 10  # Give backend time to start
+
+    # Frontend Setup and Run
+    - name: Setup and Run Frontend
+      run: |
+        cd Frontend/job_assistant
+        npm install
+        echo "VITE_BACKEND_URL=http://localhost:8000" > .env
+        npm run dev &
+        echo "Frontend started in development mode"
+        sleep 10  # Give frontend time to start
+
+    # Health Check
+    - name: Health Check
+      run: |
+        echo "Checking if services are running..."
+        curl -s http://localhost:8000/health || echo "Backend not responding"
+        curl -s http://localhost:5173 || echo "Frontend not responding"
+        ps aux | grep uvicorn
+        ps aux | grep node 
