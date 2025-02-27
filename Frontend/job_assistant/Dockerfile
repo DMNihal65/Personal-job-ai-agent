@@ -2,23 +2,33 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Create package.json
+RUN echo '{\n\
+  "name": "resume-agent-frontend",\n\
+  "version": "1.0.0",\n\
+  "description": "Simple frontend for Resume Agent",\n\
+  "main": "server.js",\n\
+  "scripts": {\n\
+    "start": "node server.js"\n\
+  },\n\
+  "dependencies": {\n\
+    "express": "^4.18.2"\n\
+  }\n\
+}' > package.json
 
 # Install dependencies
-RUN npm install --only=production
+RUN npm install
 
-# Copy source code
-COPY . .
-
-# Create a simple server file
+# Create server.js
 RUN echo 'const express = require("express");\n\
 const path = require("path");\n\
 \n\
 const app = express();\n\
 const PORT = parseInt(process.env.PORT) || 8080;\n\
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";\n\
 \n\
 console.log(`Starting server on port ${PORT}`);\n\
+console.log(`Backend URL: ${BACKEND_URL}`);\n\
 \n\
 // Basic route for testing\n\
 app.get("/", (req, res) => {\n\
@@ -39,10 +49,9 @@ app.get("/", (req, res) => {\n\
           <p>This is a simple test page for the Resume Agent Frontend.</p>\n\
           <div class="info">\n\
             <p><strong>Port:</strong> ${PORT}</p>\n\
-            <p><strong>Backend URL:</strong> ${process.env.BACKEND_URL || "Not set"}</p>\n\
-            <p><strong>Environment:</strong> ${process.env.NODE_ENV || "development"}</p>\n\
+            <p><strong>Backend URL:</strong> ${BACKEND_URL || "Not set"}</p>\n\
           </div>\n\
-          <p>The backend API is available at: <a href="${process.env.BACKEND_URL || "#"}" target="_blank">${process.env.BACKEND_URL || "Not configured"}</a></p>\n\
+          <p>The backend API is available at: <a href="${BACKEND_URL || "#"}" target="_blank">${BACKEND_URL || "Not configured"}</a></p>\n\
         </div>\n\
       </body>\n\
     </html>\n\
@@ -70,16 +79,9 @@ process.on("SIGTERM", () => {\n\
   server.close(() => {\n\
     console.log("Server closed");\n\
   });\n\
-});\n\
-' > server.js
+});' > server.js
 
-# Install express
-RUN npm install express
-
-# Make the server file executable
-RUN chmod +x server.js
-
-# Expose the port
+# Expose port 8080
 EXPOSE 8080
 
 # Start the server
